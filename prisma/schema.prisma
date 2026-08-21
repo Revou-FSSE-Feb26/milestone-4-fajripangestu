@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role      @default(USER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+
+  accounts  Account[]
+}
+
+model Account {
+  id        Int          @id @default(autoincrement())
+  name      String
+  type      Account_type @default(bank)
+  balance   Int
+  createdAt DateTime     @default(now())
+
+  userId    Int
+  user      User         @relation(fields: [userId], references: [id])
+
+  transactions Transaction[]
+}
+
+model Category {
+  id   Int           @id @default(autoincrement())
+  name String
+  type Category_type @default(expense)
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id              Int              @id @default(autoincrement())
+  type            Transaction_type @default(expense)
+  amount          Int
+  description     String
+  transactionDate DateTime         @default(now())
+  createdAt       DateTime         @default(now())
+
+  accountId       Int
+  account         Account          @relation(fields: [accountId], references: [id])
+
+  categoryId      Int
+  category        Category         @relation(fields:[categoryId], references:[id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Account_type {
+  cash
+  bank
+  eWallet
+}
+
+enum Category_type {
+  income
+  expense
+}
+
+enum Transaction_type {
+  income
+  expense
+  transfer
+}
