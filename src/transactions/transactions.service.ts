@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { TransactionsRepository } from './transactions.repository';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -17,9 +17,9 @@ export class TransactionsService {
     }
 
     async createTransaction(dto: CreateTransactionDto){
-        const account = this.transactionsRepository.getAccountBalanceById(dto.accountId);
-        const category = this.transactionsRepository.getCategoryName(dto.categoryId);
-
+        const account = await this.transactionsRepository.getAccountBalanceById(dto.accountId);
+        const category = await this.transactionsRepository.getCategoryName(dto.categoryId);
+        
         if(!account){
             return new NotFoundException(`Account with id ${dto.accountId} not found`);
         }
@@ -27,14 +27,32 @@ export class TransactionsService {
         if(!category){
             return new NotFoundException(`Category with id ${dto.accountId} not found`);
         }
+        
+        if (dto.type=="expense"){
+            if (account.balance < dto.amount || account.balance==0){
+                return new BadRequestException('Unsufficient balance')
+            }
 
-        return this.transactionsRepository.createTransaction({
-            type: dto.type,
-            amount: dto.amount,
-            description: dto.description,
-            accountId: dto.accountId,
-            categoryId: dto.categoryId
-        });
+            const newBalance = account.balance-dto.amount;
+            return this.transactionsRepository.createTransaction({
+                type: dto.type,
+                amount: dto.amount,
+                description: dto.description,
+                accountId: dto.accountId,
+                categoryId: dto.categoryId
+            }, newBalance);
+        }
+
+        if(dto.type=="income"){
+            const newBalance=account.balance+dto.amount;
+            return this.transactionsRepository.createTransaction({
+                type: dto.type,
+                amount: dto.amount,
+                description: dto.description,
+                accountId: dto.accountId,
+                categoryId: dto.categoryId
+            }, newBalance);
+        }
     }
 
     updateTransaction(id: number, dto: UpdateTransactionDto){

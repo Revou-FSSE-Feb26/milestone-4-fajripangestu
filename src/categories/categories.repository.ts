@@ -33,7 +33,7 @@ export class CategoriesRepository {
     }
 
     async deleteCategory(id: number){
-        const deletedCategory = await this.prisma.user.delete(
+        const deletedCategory = await this.prisma.category.delete(
             {
                 where: {id},
             }

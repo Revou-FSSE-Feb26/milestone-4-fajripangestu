@@ -37,10 +37,27 @@ export class TransactionsRepository {
         });
     }
 
-    createTransaction(data: CreateTransactionDto){
-        return this.prisma.transaction.create({data,
-            include: {account: true, category: true},
-        })
+    createTransaction(dto: CreateTransactionDto, newBalance){
+        return (
+            this.prisma.$transaction([
+                this.prisma.transaction.create({
+                    data: dto,
+                    include: {
+                        account: true,
+                        category: true
+                    },
+                }),
+            ]),
+            this.prisma.account.update({
+                where: {
+                    id:dto.accountId,
+                },
+                data: {
+                    balance: newBalance,
+                }
+            })
+        );
+
     }
 
     updateTransaction(id: number, dto: UpdateTransactionDto){
