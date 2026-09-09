@@ -12,8 +12,13 @@ export class TransactionsService {
         return this.transactionsRepository.getAllTransactions();
     }
 
-    getTransactionById(id: number){
-        return this.transactionsRepository.getTransactionById(id);
+    async getTransactionById(id: number){
+        const transaction = await this.transactionsRepository.getTransactionById(id);
+
+        if(!transaction)
+            return new NotFoundException(`Transaction with ID ${id} not found`)
+
+        return transaction;
     }
 
     async createTransaction(dto: CreateTransactionDto){

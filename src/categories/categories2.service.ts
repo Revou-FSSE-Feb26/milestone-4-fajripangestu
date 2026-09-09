@@ -4,7 +4,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
-export class CategoriesService {
+export class Categories2Service {
     constructor(private readonly categoriesRepository: CategoriesRepository) {}
 
     getAllCategories() {

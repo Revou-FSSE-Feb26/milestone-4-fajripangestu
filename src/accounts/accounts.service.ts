@@ -11,8 +11,13 @@ export class AccountsService {
         return this.accountsRepository.getAllAccounts();
     }
 
-    getAccountById(id: number){
-        return this.accountsRepository.getAccountById(id);
+    async getAccountById(id: number){
+        const account = await this.accountsRepository.getAccountById(id);
+
+        if (!account)
+            throw new NotFoundException(`Account with ID ${id} not found`)
+
+        return account;
     }
 
     createAccount(dto: CreateAccountDto){

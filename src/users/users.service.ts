@@ -11,8 +11,13 @@ constructor(private readonly usersRepository: UsersRepository) {}
         return this.usersRepository.getAllUsers();
     }
 
-    getUserById(id: number) {
-        return this.usersRepository.getUserById(id);
+    async getUserById(id: number) {
+        const user = await this.usersRepository.getUserById(id);
+
+        if (!user)
+            return new NotFoundException(`User with ID ${id} not found`)
+
+        return user;
     }
 
     createUser(dto: CreateUserDto) {
